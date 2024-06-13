@@ -85,6 +85,22 @@ async def create_post(post: PostBase, db: db_dependency):
     db.add(db_post)
     db.commit()
 
+@app.get("/posts/{post_id}", status_code=status.HTTP_200_OK)
+async def read_post(post_id: int, db: db_dependency):
+    db_post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if db_post is None:
+        raise HTTPException(status_code=404, detail="Post was not found")
+    return db_post
+
+@app.put("/posts/{post_id}", status_code=status.HTTP_200_OK)
+async def update_post(post_id: int, title: str, content: str, db: db_dependency):
+    db_post = db.query(models.Post).filter(models.Post.id== post_id).first()
+    if db_post is None:
+        raise HTTPException(status_code=404, detail="Post was not found")
+    db_post.title = title
+    db_post.content = content
+    db.commit()
+    return db_post
 
 @app.delete("/posts/{post_id}", status_code=status.HTTP_200_OK)
 async def delete_post(post_id: int, db: db_dependency):
@@ -93,10 +109,3 @@ async def delete_post(post_id: int, db: db_dependency):
         raise HTTPException(status_code=404, detail="Post was not found")
     db.delete(db_post)
     db.commit()
-
-@app.put("/posts/{post_id}", status_code=status.HTTP_200_OK)
-async def update_post(post_id: int, db: db_dependency):
-    db_post = db.query(models.Post).filter(models.Post.id== post_id).first()
-    if db_post is None:
-        raise HTTPException(status_code=404, detail="Post was not found")
-    
